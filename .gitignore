@@ -1,0 +1,15 @@
+.DS_Store
+Secrets.h
+build/
+buildcache/
+arduino.json
+c_cpp_properties.json
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.tmp
+*.orig
+*.bak
+*.old
