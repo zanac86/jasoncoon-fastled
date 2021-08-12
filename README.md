@@ -1,13 +1,14 @@
 # Lite version without web server
 
-Only autochange palettes and patterns.
+* Auto change palettes and patterns with random order
+* Can work on `ESP8266` and `Arduino Pro Micro`
 
-Can work on `Arduino Pro Micro` and `Arduino Pro Mini`.
-
-Next version will change of palettes and patterns by random order.
+| Button clicks | Mode               |
+|---------------|--------------------|
+| 1             | Next pattern       |
+| 2             | Change brightness  |
+| 3             | Random solid color |
 
 ## Original version
 
 https://github.com/jasoncoon/esp8266-fastled-webserver.git
-
-

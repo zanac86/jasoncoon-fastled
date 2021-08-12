@@ -16,7 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __AVR__
 #include <avr/wdt.h>
+#endif
 
 //#define FASTLED_ALLOW_INTERRUPTS 1
 //#define INTERRUPT_THRESHOLD 1
@@ -29,11 +31,16 @@ FASTLED_USING_NAMESPACE
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
-// esp8266
-//#define DATA_PIN      2
 
+#ifdef __AVR__
 // micro
-#define DATA_PIN      10
+#define DATA_PIN    10
+#define BUTTON_PIN  2
+#else
+// esp8266
+#define DATA_PIN    2
+#define BUTTON_PIN  4
+#endif
 
 // это в маленькой лампе и полосках по 30 штук
 // у в круглых платах так же
@@ -53,8 +60,8 @@ FASTLED_USING_NAMESPACE
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
 
-#define MILLI_AMPS         2500 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
-#define FRAMES_PER_SECOND  60  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
+#define MILLI_AMPS         2200 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define FRAMES_PER_SECOND  50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
 
@@ -66,13 +73,8 @@ uint8_t brightnessIndex = 0;
 
 uint8_t brightness = 150;
 
-// кнопка для micro
-#define BUTTON_PIN 2
-// так на nodemcu
-//#define BUTTON_PIN 4
 #include "GyverButton.h"
 GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
-
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
@@ -192,7 +194,6 @@ const uint8_t paletteCount = ARRAY_SIZE(palettes);
 
 void setup()
 {
-
   wdt_reset();
   wdt_disable();
 
@@ -245,10 +246,10 @@ void testTouchClicks()
     switch (clicks)
     {
       case 1:
-        adjustBrightness();
+        nextPattern();
         break;
       case 2:
-        nextPattern();
+        adjustBrightness();
         break;
       case 3:
         nextPatternIndex(29);
@@ -325,7 +326,7 @@ void nextPattern()
   currentPatternIndex = random(0, patternCount);
   patternUsed[currentPatternIndex] = true;
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
-  Serial.println(currentPatternIndex);
+  // Serial.println(currentPatternIndex);
 
   solidColor = solidColors[ random(0, solidColorsCount)];
 }
@@ -335,6 +336,7 @@ void nextPatternIndex(uint8_t i)
   currentPatternIndex = i;
   patternUsed[currentPatternIndex] = true;
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
+  solidColor = solidColors[ random(0, solidColorsCount)];
 }
 
 void setPattern(uint8_t value)
