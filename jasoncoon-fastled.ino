@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//#include <avr/wdt.h>
+#include <avr/wdt.h>
 
 //#define FASTLED_ALLOW_INTERRUPTS 1
 //#define INTERRUPT_THRESHOLD 1
@@ -30,10 +30,10 @@ FASTLED_USING_NAMESPACE
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 // esp8266
-#define DATA_PIN      2
+//#define DATA_PIN      2
 
 // micro
-//#define DATA_PIN      10
+#define DATA_PIN      10
 
 // это в маленькой лампе и полосках по 30 штук
 // у в круглых платах так же
@@ -46,9 +46,9 @@ FASTLED_USING_NAMESPACE
 //#define LED_TYPE      WS2813
 //#define COLOR_ORDER   BRG
 
-//#define NUM_LEDS      12
-//#define NUM_LEDS      20
-#define NUM_LEDS      30
+//#define NUM_LEDS      16
+#define NUM_LEDS      20
+//#define NUM_LEDS      30
 //#define NUM_LEDS      60
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
@@ -67,9 +67,9 @@ uint8_t brightnessIndex = 0;
 uint8_t brightness = 150;
 
 // кнопка для micro
-//#define BUTTON_PIN 2
+#define BUTTON_PIN 2
 // так на nodemcu
-#define BUTTON_PIN 4
+//#define BUTTON_PIN 4
 #include "GyverButton.h"
 GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
 
@@ -114,6 +114,8 @@ uint8_t currentPaletteIndex = 0;
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 CRGB solidColor = CRGB::Blue;
+CRGB solidColors[] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Purple, CRGB::Yellow, CRGB::Cyan, CRGB::Magenta};
+const uint8_t solidColorsCount = ARRAY_SIZE(solidColors);
 
 // scale the brightness of all pixels down
 void dimAll(byte value)
@@ -165,8 +167,8 @@ PatternList patterns =
   sinelon, // 26
   bpm, // 27
   juggle, //28
-  fire, // 29
-  water, // 30
+  //  fire, // 29
+  //  water, // 30
   showSolidColor, // 31
 };
 
@@ -190,11 +192,12 @@ const uint8_t paletteCount = ARRAY_SIZE(palettes);
 
 void setup()
 {
+
   wdt_reset();
   wdt_disable();
 
-  Serial.begin(115200);
-
+  //  Serial.begin(115200);
+  Serial.begin(9600);
 
   randomSeed(analogRead(0));
 
@@ -204,8 +207,10 @@ void setup()
   FastLED.setBrightness(brightness);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
   fill_solid(leds, NUM_LEDS, CRGB::Black);
+  FastLED.show();
 
   FastLED.setBrightness(brightness);
+  delay(500);
 
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
@@ -246,7 +251,7 @@ void testTouchClicks()
         nextPattern();
         break;
       case 3:
-        nextPatternIndex(22);
+        nextPatternIndex(29);
         break;
     }
   }
@@ -315,9 +320,14 @@ void nextPattern()
     currentPatternIndex = 0;
   */
 
+
+  //  currentPatternIndex = (currentPatternIndex + 1) % patternCount;
   currentPatternIndex = random(0, patternCount);
   patternUsed[currentPatternIndex] = true;
   autoPlayTimeout = millis() + (autoplayDuration * 1000);
+  Serial.println(currentPatternIndex);
+
+  solidColor = solidColors[ random(0, solidColorsCount)];
 }
 
 void nextPatternIndex(uint8_t i)
