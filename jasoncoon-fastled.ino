@@ -27,8 +27,6 @@
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
 
-#include "GradientPalettes.h"
-
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 
@@ -47,20 +45,19 @@ FASTLED_USING_NAMESPACE
 #define LED_TYPE      WS2812B
 #define COLOR_ORDER   GRB
 
-
-
 // маленькая лампа с одним кусокм на 60 штук
 //#define LED_TYPE      WS2813
 //#define COLOR_ORDER   BRG
 
+#define NUM_LEDS        12
 //#define NUM_LEDS      16
-#define NUM_LEDS      20
+//#define NUM_LEDS      20
 //#define NUM_LEDS      30
 //#define NUM_LEDS      60
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
 
-#define MILLI_AMPS         2200 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         1200 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
@@ -78,17 +75,7 @@ GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
-uint8_t secondsPerPalette = 30;
-
-// COOLING: How much does the air cool as it rises?
-// Less cooling = taller flames.  More cooling = shorter flames.
-// Default 50, suggested range 20-100
-uint8_t cooling = 49;
-
-// SPARKING: What chance (out of 255) is there that a new spark will be lit?
-// Higher chance = more roaring fire.  Lower chance = more flickery fire.
-// Default 120, suggested range 50-200.
-uint8_t sparking = 60;
+const uint8_t secondsPerPalette = 30;
 
 uint8_t speed = 30;
 
@@ -119,6 +106,25 @@ CRGB solidColor = CRGB::Blue;
 CRGB solidColors[] = {CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Purple, CRGB::Yellow, CRGB::Cyan, CRGB::Magenta};
 const uint8_t solidColorsCount = ARRAY_SIZE(solidColors);
 
+void setSolidColor(CRGB color);
+void setSolidColor(uint8_t r, uint8_t g, uint8_t b);
+void setPattern(uint8_t value);
+void addGlitter(uint8_t chanceOfGlitter);
+void colorwaves(CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette);
+void colorWaves();
+void rainbow();
+void rainbowWithGlitter();
+void rainbowSolid();
+void confetti();
+void sinelon();
+void bpm();
+void juggle();
+void pride();
+void showSolidColor();
+void adjustBrightness();
+void nextPattern();
+void nextPatternIndex(uint8_t i);
+
 // scale the brightness of all pixels down
 void dimAll(byte value)
 {
@@ -135,6 +141,7 @@ typedef Pattern PatternList[];
 #include "TwinkleFOX.h"
 #include "PridePlayground.h"
 #include "ColorWavesPlayground.h"
+#include "GradientPalettes.h"
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
@@ -169,9 +176,7 @@ PatternList patterns =
   sinelon, // 26
   bpm, // 27
   juggle, //28
-  //  fire, // 29
-  //  water, // 30
-  showSolidColor, // 31
+  showSolidColor, // 29
 };
 
 const uint8_t patternCount = ARRAY_SIZE(patterns);
@@ -503,16 +508,6 @@ void juggle()
   }
 }
 
-void fire()
-{
-  heatMap(HeatColors_p, true);
-}
-
-void water()
-{
-  heatMap(IceColors_p, false);
-}
-
 // Pride2015 by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
@@ -564,58 +559,6 @@ void radialPaletteShift()
   {
     // leds[i] = ColorFromPalette( gCurrentPalette, gHue + sin8(i*16), brightness);
     leds[i] = ColorFromPalette(gCurrentPalette, i + gHue, 255, LINEARBLEND);
-  }
-}
-
-// based on FastLED example Fire2012WithPalette: https://github.com/FastLED/FastLED/blob/master/examples/Fire2012WithPalette/Fire2012WithPalette.ino
-void heatMap(CRGBPalette16 palette, bool up)
-{
-  fill_solid(leds, NUM_LEDS, CRGB::Black);
-
-  // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy(random(256));
-
-  // Array of temperature readings at each simulation cell
-  static byte heat[NUM_LEDS];
-
-  byte colorindex;
-
-  // Step 1.  Cool down every cell a little
-  for (uint16_t i = 0; i < NUM_LEDS; i++)
-  {
-    heat[i] = qsub8(heat[i],  random8(0, ((cooling * 10) / NUM_LEDS) + 2));
-  }
-
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for (uint16_t k = NUM_LEDS - 1; k >= 2; k--)
-  {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
-  }
-
-  // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-  if (random8() < sparking)
-  {
-    int y = random8(7);
-    heat[y] = qadd8(heat[y], random8(160, 255));
-  }
-
-  // Step 4.  Map from heat cells to LED colors
-  for (uint16_t j = 0; j < NUM_LEDS; j++)
-  {
-    // Scale the heat value from 0-255 down to 0-240
-    // for best results with color palettes.
-    colorindex = scale8(heat[j], 190);
-
-    CRGB color = ColorFromPalette(palette, colorindex);
-
-    if (up)
-    {
-      leds[j] = color;
-    }
-    else
-    {
-      leds[(NUM_LEDS - 1) - j] = color;
-    }
   }
 }
 
