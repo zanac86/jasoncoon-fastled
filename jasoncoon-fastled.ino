@@ -202,8 +202,8 @@ void setup()
   wdt_reset();
   wdt_disable();
 
-  //  Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);                                        // Initialize serial port for debugging.
+  delay(1000);                                                // Soft startup to ease the flow of electrons.
 
   randomSeed(analogRead(0));
 
@@ -220,13 +220,13 @@ void setup()
 
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
-  delay(500);
+  delay(200);
   fill_solid(leds, NUM_LEDS, CRGB::Green);
   FastLED.show();
-  delay(500);
+  delay(200);
   fill_solid(leds, NUM_LEDS, CRGB::Blue);
   FastLED.show();
-  delay(500);
+  delay(200);
 
   for (uint8_t i = 0; i < patternCount; i++)
   {
