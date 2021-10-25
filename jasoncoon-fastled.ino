@@ -36,6 +36,9 @@ FASTLED_USING_NAMESPACE
 #define BUTTON_PIN  2
 #else
 // esp8266
+// с лентой ws2813 заработал только выход 0
+// если 2 - то зажигается только первый диод и все
+//#define DATA_PIN    0
 #define DATA_PIN    2
 #define BUTTON_PIN  4
 #endif
@@ -49,15 +52,15 @@ FASTLED_USING_NAMESPACE
 //#define LED_TYPE      WS2813
 //#define COLOR_ORDER   BRG
 
-#define NUM_LEDS        12
+//#define NUM_LEDS      12
 //#define NUM_LEDS      16
 //#define NUM_LEDS      20
 //#define NUM_LEDS      30
-//#define NUM_LEDS      60
+#define NUM_LEDS      60
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
 
-#define MILLI_AMPS         1200 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         1500 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
@@ -220,13 +223,13 @@ void setup()
 
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
-  delay(200);
+  delay(300);
   fill_solid(leds, NUM_LEDS, CRGB::Green);
   FastLED.show();
-  delay(200);
+  delay(300);
   fill_solid(leds, NUM_LEDS, CRGB::Blue);
   FastLED.show();
-  delay(200);
+  delay(300);
 
   for (uint8_t i = 0; i < patternCount; i++)
   {
@@ -257,7 +260,7 @@ void testTouchClicks()
         adjustBrightness();
         break;
       case 3:
-        nextPatternIndex(29);
+        nextPatternIndex(24);
         break;
     }
   }
