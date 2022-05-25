@@ -38,10 +38,13 @@ FASTLED_USING_NAMESPACE
 // esp8266
 // с лентой ws2813 заработал только выход 0
 // если 2 - то зажигается только первый диод и все
-//#define DATA_PIN    0
-#define DATA_PIN    2
+#define DATA_PIN    D3
+//#define DATA_PIN    2
 #define BUTTON_PIN  4
 #endif
+
+// comment if no button
+//#define USE_BTN
 
 // это в маленькой лампе и полосках по 30 штук
 // у в круглых платах так же
@@ -60,7 +63,7 @@ FASTLED_USING_NAMESPACE
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
 
-#define MILLI_AMPS         1500 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS         1800 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
@@ -71,14 +74,14 @@ const uint8_t brightnessCount = 3;
 uint8_t brightnessMap[brightnessCount] = { 10, 100, 250 };
 uint8_t brightnessIndex = 0;
 
-uint8_t brightness = 150;
+uint8_t brightness = 180;
 
 #include "GyverButton.h"
 GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
-const uint8_t secondsPerPalette = 30;
+const uint8_t secondsPerPalette = 20;
 
 uint8_t speed = 30;
 
@@ -98,7 +101,7 @@ CRGBPalette16 IceColors_p = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, C
 
 uint8_t currentPatternIndex = 27; // Index number of which pattern is current
 
-unsigned long autoplayDuration = 100;
+unsigned long autoplayDuration = 140;
 unsigned long autoPlayTimeout = 0;
 
 uint8_t currentPaletteIndex = 0;
@@ -260,7 +263,7 @@ void testTouchClicks()
         adjustBrightness();
         break;
       case 3:
-        nextPatternIndex(24);
+        nextPatternIndex(22);
         break;
     }
   }
@@ -297,8 +300,10 @@ void loop()
     nextPattern();
   }
 
+#ifdef USE_BUTTON
   touch.tick();
   testTouchClicks();
+#endif
 
   // Call the current pattern function once, updating the 'leds' array
   patterns[currentPatternIndex]();
