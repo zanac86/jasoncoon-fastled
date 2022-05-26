@@ -38,13 +38,12 @@ FASTLED_USING_NAMESPACE
 // esp8266
 // с лентой ws2813 заработал только выход 0
 // если 2 - то зажигается только первый диод и все
-#define DATA_PIN    D3
-//#define DATA_PIN    2
-#define BUTTON_PIN  4
+#define DATA_PIN    D4
+#define BUTTON_PIN  D2
 #endif
 
 // comment if no button
-//#define USE_BTN
+#define USE_BUTTON
 
 // это в маленькой лампе и полосках по 30 штук
 // у в круглых платах так же
@@ -64,7 +63,7 @@ FASTLED_USING_NAMESPACE
 //#define NUM_LEDS      256
 
 #define MILLI_AMPS         1800 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
-#define FRAMES_PER_SECOND  50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
+#define FRAMES_PER_SECOND  60  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
 
@@ -209,7 +208,7 @@ void setup()
   wdt_disable();
 
   Serial.begin(115200);                                        // Initialize serial port for debugging.
-  delay(1000);                                                // Soft startup to ease the flow of electrons.
+  delay(2000);                                                // Soft startup to ease the flow of electrons.
 
   randomSeed(analogRead(0));
 
@@ -218,21 +217,21 @@ void setup()
   FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(brightness);
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
-  fill_solid(leds, NUM_LEDS, CRGB::Black);
+  FastLED.clear();
   FastLED.show();
 
-  FastLED.setBrightness(brightness);
-  delay(500);
+  // тест подключения и порядка цветов
+  leds[0] = CRGB::Red;
+  leds[1] = CRGB::Red;
+  leds[2] = CRGB::Green;
+  leds[3] = CRGB::Green;
+  leds[4] = CRGB::Blue;
+  leds[5] = CRGB::Blue;
+  FastLED.show();
+  delay(350);
 
-  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  FastLED.clear();
   FastLED.show();
-  delay(300);
-  fill_solid(leds, NUM_LEDS, CRGB::Green);
-  FastLED.show();
-  delay(300);
-  fill_solid(leds, NUM_LEDS, CRGB::Blue);
-  FastLED.show();
-  delay(300);
 
   for (uint8_t i = 0; i < patternCount; i++)
   {
