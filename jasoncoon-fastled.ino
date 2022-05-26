@@ -182,6 +182,7 @@ PatternList patterns =
   bpm, // 27
   juggle, //28
   showSolidColor, // 29
+  showNightLamp
 };
 
 const uint8_t patternCount = ARRAY_SIZE(patterns);
@@ -262,7 +263,7 @@ void testTouchClicks()
         adjustBrightness();
         break;
       case 3:
-        nextPatternIndex(22);
+        nextPatternIndex(30);
         break;
     }
   }
@@ -399,6 +400,19 @@ void strandTest()
 void showSolidColor()
 {
   fill_solid(leds, NUM_LEDS, solidColor);
+}
+
+void showNightLamp()
+{
+  FastLED.clear();
+  uint16_t n = NUM_LEDS / 6;
+  uint16_t i = 0;
+  while (i < NUM_LEDS)
+  {
+    leds[i] = CHSV( 128, 50, 150);
+    i = i + n;
+  }
+  FastLED.show();
 }
 
 // Patterns from FastLED example DemoReel100: https://github.com/FastLED/FastLED/blob/master/examples/DemoReel100/DemoReel100.ino
