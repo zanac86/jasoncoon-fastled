@@ -92,22 +92,20 @@ uint8_t speed = 30;
 extern const TProgmemRGBGradientPalettePtr gGradientPalettes[];
 
 uint8_t gCurrentPaletteNumber = 0;
-
 CRGBPalette16 gCurrentPalette(CRGB::Black);
 CRGBPalette16 gTargetPalette(gGradientPalettes[0]);
-
 CRGBPalette16 IceColors_p = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, CRGB::White);
 
 uint8_t currentPatternIndex = 27;  // Index number of which pattern is current
 uint8_t lastPatternIndex = currentPatternIndex;
 
-unsigned long autoplayDuration = 30;
-unsigned long autoPlayTimeout = 0;
+// период смены эффектов
+uint32_t autoplayDuration = 30*1000;
+// текущее время запомнить для проверки
+uint32_t autoPlayTime = 0;
 
 uint8_t currentPaletteIndex = 0;
-
 uint8_t gHue = 0;  // rotating "base color" used by many of the patterns
-
 CRGB solidColor = CRGB::Blue;
 CRGB solidColors[] = { CRGB::Red, CRGB::Green, CRGB::Blue, CRGB::Purple, CRGB::Yellow, CRGB::Cyan, CRGB::Magenta };
 const uint8_t solidColorsCount = ARRAY_SIZE(solidColors);
@@ -234,7 +232,6 @@ void setup() {
   leds[3] = CRGB::Green;
   leds[4] = CRGB::Blue;
   leds[5] = CRGB::Blue;
-  FastLED.show();
   FastLED.delay(1000 / FRAMES_PER_SECOND);
   delay(200);
 
@@ -244,11 +241,16 @@ void setup() {
 
   randomSeed(random(1000, 5000));
 
+  // можно и убрать
   adjustBrightness();
-  // nextPattern();
-  autoPlayTimeout = millis() + (autoplayDuration * 1000);
 
-  FastLED.show();
+
+  // начать со случайного эффекта
+  // там внутри тоже обновится autoPlayTime на текущее время
+  nextPattern();
+  autoPlayTime = millis();
+
+  FastLED.clear();
   FastLED.delay(1000 / FRAMES_PER_SECOND);
 
   wdt_enable(WDTO_8S);
@@ -276,13 +278,11 @@ void testTouchClicks() {
 
 void loop() {
   wdt_reset();
-  // Add entropy to random number generator; we use a lot of it.
 
   EVERY_N_SECONDS(5) {
     random16_add_entropy(random(65535));
   }
 
-  //  change to a new cpt - city gradient palette
   EVERY_N_SECONDS(secondsPerPalette) {
     gCurrentPaletteNumber = addmod8(gCurrentPaletteNumber, 1, gGradientPaletteCount);
     gTargetPalette = gGradientPalettes[gCurrentPaletteNumber];
@@ -299,7 +299,8 @@ void loop() {
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
 
-  if (millis() > autoPlayTimeout) {
+  if (((uint32_t)millis()) - autoPlayTime > autoplayDuration) {
+    // там внутри обновится autoPlayTime на текущее время
     nextPattern();
   }
 
@@ -311,7 +312,7 @@ void loop() {
   // Call the current pattern function once, updating the 'leds' array
   patterns[currentPatternIndex]();
 
-  FastLED.show();
+  // FastLED.show();
 
   // insert a delay to keep the framerate modest
   FastLED.delay(1000 / FRAMES_PER_SECOND);
@@ -328,8 +329,9 @@ void nextPattern() {
 void nextPatternIndex(uint8_t i) {
   currentPatternIndex = i;
   lastPatternIndex = currentPatternIndex;
+  Serial.print("New pattern index ");
   Serial.println(currentPatternIndex);
-  autoPlayTimeout = millis() + (autoplayDuration * 1000);
+  autoPlayTime = millis();
   solidColor = solidColors[random(solidColorsCount)];
 }
 
