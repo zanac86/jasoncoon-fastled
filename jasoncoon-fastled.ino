@@ -80,7 +80,7 @@ GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
 
 // ten seconds per color palette makes a good demo
 // 20-120 is better for deployment
-const uint8_t secondsPerPalette = 10;
+const uint8_t secondsPerPalette = 25;
 
 uint8_t speed = 30;
 
@@ -100,7 +100,7 @@ uint8_t currentPatternIndex = 27;  // Index number of which pattern is current
 uint8_t lastPatternIndex = currentPatternIndex;
 
 // период смены эффектов
-uint32_t autoplayDuration = 30*1000;
+uint32_t autoplayDuration = 120*1000;
 // текущее время запомнить для проверки
 uint32_t autoPlayTime = 0;
 
@@ -125,6 +125,7 @@ void showSolidColor();
 void adjustBrightness();
 void nextPattern();
 void nextPatternIndex(uint8_t i);
+void showNightLamp();
 
 // scale the brightness of all pixels down
 void dimAll(byte value) {
