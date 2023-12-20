@@ -38,12 +38,12 @@ FASTLED_USING_NAMESPACE
 // esp8266
 // с лентой ws2813 заработал только выход 0
 // если 2 - то зажигается только первый диод и все
-#define DATA_PIN D3
+#define DATA_PIN D4
 #define BUTTON_PIN D2
 #endif
 
 // comment if no button
-//#define USE_BUTTON
+#define USE_BUTTON
 
 // это в маленькой лампе и полосках по 30 штук
 // у в круглых платах так же
@@ -51,18 +51,18 @@ FASTLED_USING_NAMESPACE
 #define COLOR_ORDER GRB
 
 // маленькая лампа с одним кусокм на 60 штук
-//#define LED_TYPE      WS2813
-//#define COLOR_ORDER   BRG
+// #define LED_TYPE      WS2813
+// #define COLOR_ORDER   BRG
 
-//#define NUM_LEDS      12
-#define NUM_LEDS 30
-//#define NUM_LEDS      20
-//#define NUM_LEDS      30
-//#define NUM_LEDS      60
+// #define NUM_LEDS      12
+// #define NUM_LEDS 30
+//#define NUM_LEDS      144
+// #define NUM_LEDS      30
+ #define NUM_LEDS      300
 //#define NUM_LEDS      64
 //#define NUM_LEDS      256
 
-#define MILLI_AMPS 1000       // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
+#define MILLI_AMPS 3500       // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND 50  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
 String nameString;
@@ -70,10 +70,10 @@ String nameString;
 CRGB leds[NUM_LEDS];
 
 const uint8_t brightnessCount = 3;
-uint8_t brightnessMap[brightnessCount] = { 20, 120, 230 };
+uint8_t brightnessMap[brightnessCount] = { 20, 120, 240 };
 uint8_t brightnessIndex = 0;
 
-uint8_t brightness = 180;
+uint8_t brightness = 240;
 
 #include "GyverButton.h"
 GButton touch(BUTTON_PIN, LOW_PULL, NORM_OPEN);
@@ -100,7 +100,7 @@ uint8_t currentPatternIndex = 27;  // Index number of which pattern is current
 uint8_t lastPatternIndex = currentPatternIndex;
 
 // период смены эффектов
-uint32_t autoplayDuration = 120*1000;
+uint32_t autoplayDuration = 100*1000;
 // текущее время запомнить для проверки
 uint32_t autoPlayTime = 0;
 
@@ -194,10 +194,12 @@ const CRGBPalette16 palettes[] = {
 
 const uint8_t paletteCount = ARRAY_SIZE(palettes);
 
+#ifndef __AVR__
 #define RANDOM_REG32 ESP8266_DREG(0x20E44)
 uint8_t random_esp8266(uint8_t upper) {
   return (RANDOM_REG32) % upper;
 }
+#endif
 
 void setup() {
   wdt_reset();
@@ -210,12 +212,14 @@ void setup() {
 
   Serial.println();
 
+#ifndef __AVR__
   for (int i = 0; i < 10; i++) {
     uint32_t r = RANDOM_REG32;
     Serial.print(r);
     Serial.print(" ");
   }
   Serial.println();
+#endif
 
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);  // for WS2812 (Neopixel)
   FastLED.setDither(false);
@@ -371,7 +375,7 @@ void showSolidColor() {
 
 void showNightLamp() {
   FastLED.clear();
-  uint16_t n = NUM_LEDS / 6;
+  uint16_t n = NUM_LEDS / 5;
   uint16_t i = 0;
   while (i < NUM_LEDS) {
     leds[i] = CHSV(128, 50, 150);
